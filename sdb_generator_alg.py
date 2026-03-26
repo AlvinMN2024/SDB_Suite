@@ -1,13 +1,20 @@
 # -*- coding: utf-8 -*-
 import os
 import numpy as np
-import joblib
-import rasterio
 from qgis.PyQt.QtCore import QCoreApplication
-from qgis.PyQt.QtGui import QIcon # Qt6 Requirement
+from qgis.PyQt.QtGui import QIcon
 from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterRasterLayer,
                        QgsProcessingParameterFile, QgsProcessingParameterNumber,
-                       QgsProcessingParameterRasterDestination)
+                       QgsProcessingParameterRasterDestination, QgsProcessingException)
+
+# --- Safe Dependency Imports ---
+try:
+    import joblib
+    import rasterio
+    from sklearn.ensemble import RandomForestRegressor
+    HAS_DEPS = True
+except ImportError:
+    HAS_DEPS = False
 
 class SDBGeneratorAlgorithm(QgsProcessingAlgorithm):
     INPUT_TIF = 'INPUT_TIF'
@@ -43,6 +50,13 @@ class SDBGeneratorAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterRasterDestination(self.OUTPUT, self.tr('Final Bathymetry Raster')))
 
     def processAlgorithm(self, parameters, context, feedback):
+        # 1. Dependency Check
+        if not HAS_DEPS:
+            raise QgsProcessingException(
+                self.tr("CRITICAL ERROR: Missing libraries! Please install 'scikit-learn' and 'rasterio' "
+                        "in your QGIS Python environment to run the Generator.")
+            )
+
         out_path = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
         tif_layer = self.parameterAsRasterLayer(parameters, self.INPUT_TIF, context)
         tif_path = tif_layer.source()
@@ -51,6 +65,7 @@ class SDBGeneratorAlgorithm(QgsProcessingAlgorithm):
         stretch = self.parameterAsDouble(parameters, self.STRETCH, context)
         bias = self.parameterAsDouble(parameters, self.BIAS, context)
         
+        # Load the model
         loaded_data = joblib.load(model_file)
         model = loaded_data['model']
         feats = loaded_data['features']
@@ -64,16 +79,22 @@ class SDBGeneratorAlgorithm(QgsProcessingAlgorithm):
 
             data_stack = []
             for f in feats:
+                # Use the user-provided band index
                 idx = parameters[self.B665] if f == 'ln_665' else band_map.get(f)
                 raw_data = src.read(int(idx)).astype(float)
+                # Clean up data to avoid log(0)
                 raw_cleaned = np.maximum(raw_data, 1e-6)
                 data_stack.append(np.log(raw_cleaned) if f == 'ln_665' else raw_cleaned)
 
+            # Flatten and Predict
             flat_input = np.stack(data_stack, axis=-1).reshape(-1, len(feats))
             prediction = model.predict(flat_input)
             
+            # Reconstruct and Apply Bias/Stretch
             depth_raw = -np.exp(prediction).reshape(src.shape)
             depth_final = (depth_raw * stretch) + bias
+            
+            # Mask extreme values
             depth_final[(depth_final > 2) | (depth_final < -60)] = np.nan
 
             out_meta = src.profile.copy()

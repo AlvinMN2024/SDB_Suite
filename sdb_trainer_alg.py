@@ -1,13 +1,21 @@
 # -*- coding: utf-8 -*-
 import os
 from qgis.PyQt.QtCore import QCoreApplication
-from qgis.PyQt.QtGui import QIcon # Qt6 Requirement
+from qgis.PyQt.QtGui import QIcon
 from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterFile, 
-                       QgsProcessingParameterNumber, QgsProcessingParameterFileDestination)
+                       QgsProcessingParameterNumber, QgsProcessingParameterFileDestination,
+                       QgsProcessingException) # Added Exception for errors
+
 import pandas as pd
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor
-import joblib
+
+# --- Safe Dependency Imports ---
+try:
+    from sklearn.ensemble import RandomForestRegressor
+    import joblib
+    HAS_SKLEARN = True
+except ImportError:
+    HAS_SKLEARN = False
 
 class SDBTrainerAlgorithm(QgsProcessingAlgorithm):
     CSV_INPUT = 'CSV_INPUT'
@@ -21,7 +29,6 @@ class SDBTrainerAlgorithm(QgsProcessingAlgorithm):
     def displayName(self): return self.tr('1. Train Bathymetry Model (RF)')
     
     def icon(self):
-        # Points to your 24x24px satellite icon
         icon_path = os.path.join(os.path.dirname(__file__), 'icon.png')
         return QIcon(icon_path) if os.path.exists(icon_path) else super().icon()
 
@@ -44,6 +51,14 @@ class SDBTrainerAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(QgsProcessingParameterFileDestination(self.MODEL_OUTPUT, self.tr('Save Model (.pkl)'), 'Pickle (*.pkl)'))
 
     def processAlgorithm(self, parameters, context, feedback):
+        # 1. Dependency Check First
+        if not HAS_SKLEARN:
+            raise QgsProcessingException(
+                self.tr("CRITICAL ERROR: 'scikit-learn' is not installed. "
+                        "Please run 'sudo apt install python3-sklearn' (Linux) "
+                        "or 'pip install scikit-learn' (Windows OSGeo4W Shell) to use this tool.")
+            )
+
         csv_path = self.parameterAsFile(parameters, self.CSV_INPUT, context)
         model_path = self.parameterAsFileOutput(parameters, self.MODEL_OUTPUT, context)
         

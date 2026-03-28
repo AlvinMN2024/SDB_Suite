@@ -1,8 +1,9 @@
 [general]
 name=SDB Production Suite
-qgisMinimumVersion=3.0
+qgisMinimumVersion=4.0
+qgisMaximumVersion=4.99
 description=Professional Satellite Derived Bathymetry (SDB) generation tool using Random Forest Regression.
-version=1.0.0
+version=1.0.1
 author=Alvin M. Natividad
 email=AlvinMN2022@gmail.com
 repository=https://github.com/AlvinMN2024/SDB_Suite
@@ -11,8 +12,4 @@ tags=bathymetry, remote sensing, hydrography, sentinel-2, machine learning
 icon=icon.png
 
 [about]
-about=This suite provides high-precision bathymetric mapping tools for the 2026 Apurawan/Ilian project. 
-It integrates ACOLITE-processed multispectral data with surveyed sonar points 
-to create MLLW-referenced seafloor models. 
-
-Supported by Gemini AI Adaptive Architecture.
+about=This suite provides high-precision bathymetric mapping tools for the 2026 Apurawan/Ilian project. It integrates ACOLITE-processed multispectral data with surveyed sonar points to create MLLW-referenced seafloor models. Supported by Gemini AI Adaptive Architecture.

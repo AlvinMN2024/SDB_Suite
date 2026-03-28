@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 from qgis.core import QgsProcessingProvider
-# In QGIS 4/Qt6, ensure we import QIcon from PyQt6.QtGui
 from PyQt6.QtGui import QIcon 
 from .sdb_trainer_alg import SDBTrainerAlgorithm
 from .sdb_generator_alg import SDBGeneratorAlgorithm
@@ -21,10 +20,36 @@ class SDBProvider(QgsProcessingProvider):
         return 'SDB Production Suite'
 
     def icon(self):
-        # Explicitly point to your icon.png in the plugin folder
         icon_path = os.path.join(os.path.dirname(__file__), 'icon.png')
         if os.path.exists(icon_path):
             return QIcon(icon_path)
-        # Fallback to the default if the file is missing
         return super().icon()
-    
+
+    @staticmethod
+    def get_sdb_interpretation(r2, rmse, bias, max_depth=15.0):
+        """
+        Calculates hydrographic precision labels for the SDB Manual standards.
+        """
+        # 1. R2 Interpretation (Correlation)
+        if r2 > 0.85: r2_desc = "Strong Correlation"
+        elif r2 > 0.70: r2_desc = "Moderate Correlation"
+        else: r2_desc = "Weak Correlation (Review Training Data)"
+
+        # 2. RMSE Interpretation (The 10% Depth Rule)
+        # Using 1.14m vs 15m as the 'High Precision' benchmark
+        error_ratio = (rmse / max_depth) * 100
+        if error_ratio < 5: rmse_desc = "Elite / Survey Grade"
+        elif error_ratio < 10: rmse_desc = "High Precision"
+        elif error_ratio < 20: rmse_desc = "Moderate / Acceptable"
+        else: rmse_desc = "Low Precision (Check ACOLITE/Turbidity)"
+
+        # 3. Bias Interpretation (Vertical Alignment)
+        if abs(bias) < 0.10: bias_desc = "Near-Perfect Vertical Alignment"
+        elif bias > 0.10: bias_desc = "Systemic Overestimation (Deep Bias)"
+        else: bias_desc = "Systemic Underestimation (Shallow Bias)"
+
+        return {
+            "R2_Text": f"{r2:.3f} ({r2_desc})",
+            "RMSE_Text": f"{rmse:.2f}m ({rmse_desc})",
+            "Bias_Text": f"{bias:.2f}m ({bias_desc})"
+        }

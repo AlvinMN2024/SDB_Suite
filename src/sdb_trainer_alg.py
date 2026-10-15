@@ -68,8 +68,10 @@ class SDBTrainerAlgorithm(QgsProcessingAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterFile(self.CSV_INPUT, self.tr('Input Control Soundings CSV'), extension='csv'))
-        self.addParameter(QgsProcessingParameterNumber(self.SHALLOW_MIN, self.tr('Min Depth (m, positive)'), defaultValue=0.5, type=QgsProcessingParameterNumber.Double))
-        self.addParameter(QgsProcessingParameterNumber(self.SHALLOW_MAX, self.tr('Max Depth (m, positive)'), defaultValue=20.0, type=QgsProcessingParameterNumber.Double))
+        #self.addParameter(QgsProcessingParameterNumber(self.SHALLOW_MIN, self.tr('Min Depth (m, positive)'), defaultValue=0.5, type=QgsProcessingParameterNumber.Double))
+        self.addParameter(QgsProcessingParameterNumber(self.SHALLOW_MIN, self.tr('Min Depth (m, positive)'), defaultValue=0.5, type=QgsProcessingParameterNumber.Type.Double))
+        #self.addParameter(QgsProcessingParameterNumber(self.SHALLOW_MAX, self.tr('Max Depth (m, positive)'), defaultValue=20.0, type=QgsProcessingParameterNumber.Double))
+        self.addParameter(QgsProcessingParameterNumber(self.SHALLOW_MAX, self.tr('Max Depth (m, positive)'), defaultValue=20.0, type=QgsProcessingParameterNumber.Type.Double))
         self.addParameter(QgsProcessingParameterFileDestination(self.MODEL_OUTPUT, self.tr('Save Model (.pkl)'), 'Pickle (*.pkl)'))
 
     def processAlgorithm(self, parameters, context, feedback):

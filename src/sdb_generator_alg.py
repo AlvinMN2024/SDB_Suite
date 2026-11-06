@@ -58,16 +58,20 @@ class SDBGeneratorAlgorithm(QgsProcessingAlgorithm):
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterRasterLayer(self.INPUT_TIF, self.tr('Satellite Multi-band TIF')))
         self.addParameter(QgsProcessingParameterFile(self.MODEL, self.tr('Model File (.pkl)'), extension='pkl'))
-        self.addParameter(QgsProcessingParameterNumber(self.B443, 'Band Index: 443nm', defaultValue=1))
-        self.addParameter(QgsProcessingParameterNumber(self.B492, 'Band Index: 492nm', defaultValue=1))
-        self.addParameter(QgsProcessingParameterNumber(self.B560, 'Band Index: 560nm', defaultValue=2))
-        self.addParameter(QgsProcessingParameterNumber(self.B665, 'Band Index: 665nm', defaultValue=3))
-        self.addParameter(QgsProcessingParameterNumber(self.BTUR, 'Band Index: TUR (Turbidity)', defaultValue=4))
-        self.addParameter(QgsProcessingParameterNumber(self.BSPM, 'Band Index: SPM (Suspended Matter)', defaultValue=5))
-        self.addParameter(QgsProcessingParameterNumber(self.STRETCH, 'Depth Stretch Constant', defaultValue=1.0))
-        self.addParameter(QgsProcessingParameterNumber(self.BIAS, 'Bias Correction (m)', defaultValue=-0.14))
+        
+        # Band Indices (Must be Integers)
+        self.addParameter(QgsProcessingParameterNumber(self.B443, 'Band Index: 443nm', type=QgsProcessingParameterNumber.Integer, defaultValue=1))
+        self.addParameter(QgsProcessingParameterNumber(self.B492, 'Band Index: 492nm', type=QgsProcessingParameterNumber.Integer, defaultValue=2))
+        self.addParameter(QgsProcessingParameterNumber(self.B560, 'Band Index: 560nm', type=QgsProcessingParameterNumber.Integer, defaultValue=3))
+        self.addParameter(QgsProcessingParameterNumber(self.B665, 'Band Index: 665nm', type=QgsProcessingParameterNumber.Integer, defaultValue=4))
+        self.addParameter(QgsProcessingParameterNumber(self.BTUR, 'Band Index: TUR (Turbidity)', type=QgsProcessingParameterNumber.Integer, defaultValue=5))
+        self.addParameter(QgsProcessingParameterNumber(self.BSPM, 'Band Index: SPM (Suspended Matter)', type=QgsProcessingParameterNumber.Integer, defaultValue=6))
+        
+        # Mathematical Constants (Must be Doubles for Floats like 0.42)
+        self.addParameter(QgsProcessingParameterNumber(self.STRETCH, 'Depth Stretch Constant', type=QgsProcessingParameterNumber.Double, defaultValue=1.0))
+        self.addParameter(QgsProcessingParameterNumber(self.BIAS, 'Bias Correction (m)', type=QgsProcessingParameterNumber.Double, defaultValue=0.0))
+        
         self.addParameter(QgsProcessingParameterRasterDestination(self.OUTPUT, self.tr('Final Bathymetry Raster')))
-
     def processAlgorithm(self, parameters, context, feedback):
         if not HAS_DEPS:
             raise QgsProcessingException(

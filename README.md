@@ -8,7 +8,7 @@ The plugin produces estimates from the supplied predictors and soundings. Its me
 
 ## Requirements
 
-- QGIS 3.22 through 4.x (metadata currently permits versions through 4.99).
+- The plugin metadata declares QGIS 3.22 through 4.99. The prepared release was smoke-tested with QGIS 4.2.3; QGIS 3.22 was not runtime-tested.
 - The QGIS Python environment must provide `numpy`, `pandas`, `scikit-learn`, and `joblib`.
 - The plugin uses QGIS/GDAL raster bindings; it does not require `rasterio`.
 

@@ -1,0 +1,19 @@
+[general]
+name=SDB Production Suite
+qgisMinimumVersion=3.22
+qgisMaximumVersion=4.99
+description=Local-use satellite-derived bathymetry estimates with Random Forest regression and spatial validation.
+about=QGIS Processing tools for local reconnaissance and supplementary bathymetry review from raster predictors and soundings. Outputs require expert review and do not establish safe under-keel clearance, official chart depths, or IHO S-44 compliance. Requires numpy, pandas, scikit-learn, and joblib in the QGIS Python environment; QGIS/GDAL provides raster access.
+version=1.1.0
+author=Alvin M. Natividad
+email=AlvinMN2022@gmail.com
+repository=https://github.com/AlvinMN2024/SDB_Suite
+tracker=https://github.com/AlvinMN2024/SDB_Suite/issues
+homepage=https://github.com/AlvinMN2024/SDB_Suite
+changelog=1.1.0 - Replaces OOB scoring with pixel-aggregated spatial-block cross-validation and optional buffering.
+    Adds depth-stratified and baseline diagnostics, and saves validation provenance with the model.
+    Makes tide correction explicit, improves predictor and nodata handling, and removes precision labels.
+category=Raster
+tags=bathymetry, remote sensing, hydrography, sentinel-2, machine learning, SDB, OSGeo
+license=GPL-2.0-or-later
+icon=icon.png

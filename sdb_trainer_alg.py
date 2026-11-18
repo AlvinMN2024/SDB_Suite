@@ -653,7 +653,10 @@ class SDBTrainerAlgorithm(QgsProcessingAlgorithm):
                 'training_tide_mllw': training_tide,
                 'rf_parameters': full_rf_parameters,
                 'metrics': {
-                    'validation_method': 'spatial_block_cv_no_buffer',
+                    'validation_method': (
+                        'spatial_block_cv_with_buffer' if buffer_distance > 0
+                        else 'spatial_block_cv_no_buffer'
+                    ),
                     'primary': selected_metrics,
                     'depth_strata': depth_metrics,
                     'feature_set_comparison': ablation_metrics,

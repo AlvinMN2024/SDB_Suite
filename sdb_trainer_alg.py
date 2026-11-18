@@ -1,5 +1,3 @@
-#Refactored & Optimized sdb_trainer_alg.py
-#Tuesday 13 Oct 2026 3:35pm. Phil Standard time
 
 # -*- coding: utf-8 -*-
 import os
